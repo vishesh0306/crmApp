@@ -16,6 +16,7 @@ const pool = mysql.createPool({
   database: 'crmdatabase'
 });
 
+
 // Listen for the 'connection' event to check if the connection is successful
 pool.on('connection', () => {
   console.log('Connected to MySQL server');
