@@ -1,8 +1,12 @@
 const express = require('express');
-const mysql = require('mysql');
+const bodyParser = require('body-parser'); // Import body-parser module
+const mysql = require('mysql2');
 
 const app = express();
-const port = 3000; // Change this to your desired port number
+const port = 3000;
+
+// Middleware to parse JSON bodies
+app.use(bodyParser.json());
 
 // Create a connection to the MySQL database
 const connection = mysql.createConnection({
@@ -22,14 +26,11 @@ connection.connect((err) => {
   console.log('Connected to MySQL server');
 });
 
-// Define the data you want to insert
-const newData = {
-  name: 'John Doe',
-  email: 'john@example.com'
-};
-
 // API endpoint to execute the insertion
-app.get('/insertData', (req, res) => {
+app.post('/insertData', (req, res) => {
+  // Receive data from the request body
+  const newData = req.body;
+
   // Insert data into a table
   connection.query('INSERT INTO your_table_name SET ?', newData, (err, results) => {
     if (err) {
@@ -43,7 +44,6 @@ app.get('/insertData', (req, res) => {
   });
 });
 
-// API endpoint to check database connection status
 app.get('/dbStatus', (req, res) => {
   if (connection.state === 'authenticated') {
     res.send('Database connection is active');
@@ -55,16 +55,4 @@ app.get('/dbStatus', (req, res) => {
 // Start the Express server
 app.listen(port, () => {
   console.log(`Server is listening on port ${port}`);
-});
-
-// Close the connection to the MySQL server when the application exits
-process.on('exit', () => {
-  connection.end((err) => {
-    if (err) {
-      console.error('Error closing MySQL connection: ' + err.stack);
-      return;
-    }
-
-    console.log('Connection to MySQL server closed');
-  });
 });
