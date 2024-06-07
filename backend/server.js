@@ -44,25 +44,26 @@ app.post('/insertData', (req, res) => {
   });
 });
 
-app.get('/dbStatus', (req, res) => {
+app.get('/dbStatus', async (req, res) => {
   try {
-      // Get a connection from the pool
-      const connection = await pool.getConnection();
+    // Get a connection from the pool
+    const connection = await pool.getConnection();
 
-      // Check if the connection is active
-      const [rows, fields] = await connection.query('SELECT 1');
+    // Check if the connection is active
+    const [rows, fields] = await connection.query('SELECT 1');
 
-      // Release the connection back to the pool
-      connection.release();
+    // Release the connection back to the pool
+    connection.release();
 
-      // If the query succeeds, send a response indicating that the database connection is active
-      res.send('Database connection is active');
-    } catch (error) {
-      // If an error occurs, send a 500 error response indicating that the database connection is not active
-      console.error('Error checking database connection:', error);
-      res.status(500).send('Database connection is not active');
-    }
+    // If the query succeeds, send a response indicating that the database connection is active with status code 200
+    res.status(200).send('Database connection is active');
+  } catch (error) {
+    // If an error occurs, send a 500 error response indicating that the database connection is not active
+    console.error('Error checking database connection:', error);
+    res.status(500).send('Database connection is not active');
+  }
 });
+
 
 // Start the Express server
 app.listen(port, () => {
