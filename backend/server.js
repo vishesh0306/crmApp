@@ -1,40 +1,38 @@
 const express = require('express');
-const bodyParser = require('body-parser'); // Import body-parser module
+const bodyParser = require('body-parser');
 const mysql = require('mysql2');
 
 const app = express();
 const port = 3000;
 
-// Middleware to parse JSON bodies
 app.use(bodyParser.json());
 
-// Create a connection to the MySQL database
-const connection = mysql.createConnection({
+// Create a connection pool to the MySQL database
+const pool = mysql.createPool({
   host: 'localhost',
-  user: 'your_username',
-  password: 'your_password',
-  database: 'your_database_name'
+  port: '3306',
+  user: 'root',
+  password: 'Vishesh@2003',
+  database: 'crmdatabase'
 });
 
-// Connect to the MySQL server
-connection.connect((err) => {
-  if (err) {
-    console.error('Error connecting to MySQL server: ' + err.stack);
-    return;
-  }
-
+// Listen for the 'connection' event to check if the connection is successful
+pool.on('connection', () => {
   console.log('Connected to MySQL server');
+});
+
+// Listen for the 'error' event to handle connection errors
+pool.on('error', (err) => {
+  console.error('Error connecting to MySQL server:', err);
 });
 
 // API endpoint to execute the insertion
 app.post('/insertData', (req, res) => {
-  // Receive data from the request body
   const newData = req.body;
 
-  // Insert data into a table
-  connection.query('INSERT INTO your_table_name SET ?', newData, (err, results) => {
+  pool.query('INSERT INTO dummydata SET ?', newData, (err, results) => {
     if (err) {
-      console.error('Error inserting data: ' + err.stack);
+      console.error('Error inserting data:', err);
       res.status(500).send('Error inserting data');
       return;
     }
@@ -43,32 +41,15 @@ app.post('/insertData', (req, res) => {
     res.send('Inserted data successfully');
   });
 });
+
+// API endpoint to check database connection status
 app.get('/dbStatus', (req, res) => {
-  // Get a connection from the pool
-  pool.getConnection((err, connection) => {
-    if (err) {
-      console.error('Error getting database connection:', err);
-      res.status(500).send('Error getting database connection');
-      return;
-    }
-
-    // Check if the connection is active
-    connection.query('SELECT 1', (err, results) => {
-      // Release the connection back to the pool
-      connection.release();
-
-      if (err) {
-        console.error('Error checking database connection:', err);
-        res.status(500).send('Database connection is not active');
-        return;
-      }
-
-      console.log('Database connection is active');
-      res.send('Database connection is active');
-    });
-  });
+  if (pool._closed === false) {
+    res.status(200).send('Database connection pool is active');
+  } else {
+    res.status(500).send('Database connection pool is not active');
+  }
 });
-
 
 // Start the Express server
 app.listen(port, () => {
