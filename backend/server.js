@@ -7,7 +7,7 @@ const port = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 
-const dataRoutes = require('./routes/dataRoutes');
+const dataRoutes = require('./routes/dataRoutes.js');
 
 app.use('/api', dataRoutes);
 
