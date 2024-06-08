@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const protectedController = require('../controllers/protectedController');
-const authMiddleware = require('../middlewares/authMiddleware');
+const protectedController = require('../controllers/protectedControllers');
+const authMiddleware = require('../middleware/authMiddleware');
 
 router.get('/working', authMiddleware.authenticateJWT, protectedController.working);
 
